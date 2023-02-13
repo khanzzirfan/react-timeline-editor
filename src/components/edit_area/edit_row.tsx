@@ -17,7 +17,6 @@ export type EditRowProps = CommonProp & {
   scrollLeft: number;
   /** 设置scroll left */
   deltaScrollLeft: (scrollLeft: number) => void;
-  onDrop: (rowId: string, actionId: string) => void;
 };
 
 export const EditRow: FC<EditRowProps> = (props) => {
