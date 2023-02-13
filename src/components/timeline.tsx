@@ -9,10 +9,11 @@ import { Cursor } from './cursor/cursor';
 import { EditArea } from './edit_area/edit_area';
 import './timeline.less';
 import { TimeArea } from './time_area/time_area';
+import interact from 'interactjs';
 
 export const Timeline = React.forwardRef<TimelineState, TimelineEditor>((props, ref) => {
   const checkedProps = checkProps(props);
-  const { style } = props;
+  const { style, onDrop } = props;
   let {
     effects,
     editorData: data,
@@ -48,6 +49,81 @@ export const Timeline = React.forwardRef<TimelineState, TimelineEditor>((props, 
     setScaleCount(Math.max(minScaleCount, getScaleCountByRows(data, { scale })));
     setEditorData(data);
   }, [data, minScaleCount, scale]);
+
+  useEffect(() => {
+    interact('.timeline-editor-edit-row').dropzone({
+      accept: '.timeline-editor-action',
+      overlap: 0.85,
+      ondropactivate: function (event) {
+        // add active dropzone feedback
+        event.target.classList.add('drop-active');
+      },
+      ondragenter: function (event) {
+        let draggableElement = event.relatedTarget;
+        let dropzoneElement = event.target;
+        // feedback the possibility of a drop
+        dropzoneElement.classList.add('drop-target');
+        draggableElement.classList.add('can-drop');
+        // draggableElement.textContent = 'Dragged in';
+      },
+      ondragleave: function (event) {
+        // remove the drop feedback style
+        event.target.classList.remove('drop-target');
+        event.relatedTarget.classList.remove('can-drop');
+        // event.relatedTarget.textContent = 'Dragged out';
+      },
+      ondrop: function (event) {
+        if (event) {
+          event.stopPropagation();
+        }
+        const rowId = event.currentTarget.getAttribute('data-rowid');
+        const actionId = event.relatedTarget.getAttribute('data-actionid');
+        let droppedRowData = null;
+        let oldRowId = null;
+        let actionData = null;
+        editorData.forEach((f) => {
+          const hasAction = f.actions.find((e) => e.id === actionId);
+          if (hasAction) {
+            oldRowId = f.id;
+            actionData = hasAction;
+            const { actions, ...restProps } = f;
+            droppedRowData = restProps;
+          }
+        });
+
+        const modifiedEditorData = editorData.map((er) => {
+          if (er.id === rowId) {
+            const currActions = er.actions || [];
+            const updatedActions = currActions.concat(actionData);
+
+            return {
+              ...er,
+              actions: updatedActions,
+            };
+          } else if (er.id === oldRowId) {
+            const updatedActions = er.actions.filter((f) => f.id !== actionData.id);
+            return {
+              ...er,
+              actions: updatedActions,
+            };
+          }
+          return er;
+        });
+        setEditorData(modifiedEditorData);
+        handleEditorDataChange(modifiedEditorData);
+        if (onDrop) {
+          onDrop(rowId, actionId);
+        }
+      },
+      ondropdeactivate: function (event) {
+        event.stopPropagation();
+        // remove active dropzone feedback
+        event.target.classList.remove('drop-active');
+        event.target.classList.remove('drop-target');
+        event.relatedTarget.style.removeProperty('top');
+      },
+    });
+  }, []);
 
   useEffect(() => {
     engineRef.current.effects = effects;

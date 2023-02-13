@@ -188,6 +188,14 @@ export interface EditData {
    * @description cursor拖拽事件
    */
   onCursorDrag?: (time: number) => void;
+
+  /**
+   * action item dropped to new row.
+   * @param rowId row id dropped to
+   * @param actionId action item id that got dropped to a rowid
+   * @returns
+   */
+  onDrop?: (rowId, actionId) => void;
 }
 
 export interface TimelineState {

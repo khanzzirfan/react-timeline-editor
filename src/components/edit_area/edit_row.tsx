@@ -17,21 +17,11 @@ export type EditRowProps = CommonProp & {
   scrollLeft: number;
   /** 设置scroll left */
   deltaScrollLeft: (scrollLeft: number) => void;
+  onDrop: (rowId: string, actionId: string) => void;
 };
 
 export const EditRow: FC<EditRowProps> = (props) => {
-  const {
-    rowData,
-    style = {},
-    onClickRow,
-    onDoubleClickRow,
-    onContextMenuRow,
-    areaRef,
-    scrollLeft,
-    startLeft,
-    scale,
-    scaleWidth,
-  } = props;
+  const { rowData, style = {}, onClickRow, onDoubleClickRow, onContextMenuRow, areaRef, scrollLeft, startLeft, scale, scaleWidth } = props;
 
   const classNames = ['edit-row'];
   if (rowData?.selected) classNames.push('edit-row-selected');
@@ -47,9 +37,9 @@ export const EditRow: FC<EditRowProps> = (props) => {
 
   return (
     <div
-      className={`${prefix(...classNames)} ${(rowData?.classNames || []).join(
-        ' ',
-      )}`}
+      className={`${prefix(...classNames)} ${(rowData?.classNames || []).join(' ')}`}
+      data-testid="itemrow"
+      data-rowid={rowData?.id}
       style={style}
       onClick={(e) => {
         if (rowData && onClickRow) {
@@ -71,13 +61,7 @@ export const EditRow: FC<EditRowProps> = (props) => {
       }}
     >
       {(rowData?.actions || []).map((action) => (
-        <EditAction
-          key={action.id}
-          {...props}
-          handleTime={handleTime}
-          row={rowData}
-          action={action}
-        />
+        <EditAction key={action.id} {...props} handleTime={handleTime} row={rowData} action={action} />
       ))}
     </div>
   );

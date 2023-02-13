@@ -1,10 +1,11 @@
 import { Interactable } from '@interactjs/core/Interactable';
-import { DragEvent, ResizeEvent } from '@interactjs/types/index';
+import { DragEvent, DropEvent, ResizeEvent } from '@interactjs/types/index';
 import React, { ReactElement, useEffect, useImperativeHandle, useRef } from 'react';
 import { DEFAULT_ADSORPTION_DISTANCE, DEFAULT_MOVE_GRID, DEFAULT_START_LEFT } from '../../interface/const';
 import { useAutoScroll } from './hooks/useAutoScroll';
 import { InteractComp } from './interactable';
 import { Direction, RowRndApi, RowRndProps } from './row_rnd_interface';
+import interact from 'interactjs';
 
 export const RowDnd = React.forwardRef<RowRndApi, RowRndProps>(
   (
@@ -13,12 +14,13 @@ export const RowDnd = React.forwardRef<RowRndApi, RowRndProps>(
       edges,
       left,
       width,
-
+      top,
       start = DEFAULT_START_LEFT,
       grid = DEFAULT_MOVE_GRID,
       bounds = {
         left: Number.MIN_SAFE_INTEGER,
         right: Number.MAX_SAFE_INTEGER,
+        top: Number.MAX_SAFE_INTEGER,
       },
       enableResizing = true,
       enableDragging = true,
@@ -32,11 +34,15 @@ export const RowDnd = React.forwardRef<RowRndApi, RowRndProps>(
       onDrag,
       parentRef,
       deltaScrollLeft,
+      onDrop,
     },
     ref,
   ) => {
     const interactable = useRef<Interactable>();
     const deltaX = useRef(0);
+    const deltaY = useRef(0);
+    const originalY = useRef(0);
+
     const isAdsorption = useRef(false);
     const { initAutoScroll, dealDragAutoScroll, dealResizeAutoScroll, stopAutoScroll } = useAutoScroll(parentRef);
 
@@ -50,16 +56,24 @@ export const RowDnd = React.forwardRef<RowRndApi, RowRndProps>(
     useImperativeHandle(ref, () => ({
       updateLeft: (left) => handleUpdateLeft(left || 0, false),
       updateWidth: (width) => handleUpdateWidth(width, false),
+      updateTop: (top) => handleUpdateTop(top || 0, false),
       getLeft: handleGetLeft,
       getWidth: handleGetWidth,
+      getTop: handleGetTop,
     }));
+
     useEffect(() => {
       const target = interactable.current.target as HTMLElement;
       handleUpdateWidth(typeof width === 'undefined' ? target.offsetWidth : width, false);
     }, [width]);
+
     useEffect(() => {
       handleUpdateLeft(left || 0, false);
     }, [left]);
+
+    // useEffect(() => {
+    //   handleUpdateTop(top || 0, false);
+    // }, [top]);
 
     const handleUpdateLeft = (left: number, reset = true) => {
       if (!interactable.current || !interactable.current.target) return;
@@ -68,6 +82,15 @@ export const RowDnd = React.forwardRef<RowRndApi, RowRndProps>(
       target.style.left = `${left}px`;
       Object.assign(target.dataset, { left });
     };
+
+    const handleUpdateTop = (top: number, reset = true) => {
+      if (!interactable.current || !interactable.current.target) return;
+      reset && (deltaY.current = 0);
+      const target = interactable.current.target as HTMLElement;
+      target.style.top = `${top}px`;
+      Object.assign(target.dataset, { top });
+    };
+
     const handleUpdateWidth = (width: number, reset = true) => {
       if (!interactable.current || !interactable.current.target) return;
       reset && (deltaX.current = 0);
@@ -79,6 +102,12 @@ export const RowDnd = React.forwardRef<RowRndApi, RowRndProps>(
       const target = interactable.current.target as HTMLElement;
       return parseFloat(target?.dataset?.left || '0');
     };
+
+    const handleGetTop = () => {
+      const target = interactable.current.target as HTMLElement;
+      return parseFloat(target?.dataset?.top || '0');
+    };
+
     const handleGetWidth = () => {
       const target = interactable.current.target as HTMLElement;
       return parseFloat(target?.dataset?.width || '0');
@@ -88,13 +117,15 @@ export const RowDnd = React.forwardRef<RowRndApi, RowRndProps>(
     //#region [rgba(188,188,120,0.05)] 回调api
     const handleMoveStart = (e: DragEvent) => {
       deltaX.current = 0;
+      deltaY.current = 0;
+      originalY.current = e.dy;
       isAdsorption.current = false;
       initAutoScroll();
       onDragStart && onDragStart();
     };
 
-    const move = (param: { preLeft: number; preWidth: number; scrollDelta?: number }) => {
-      const { preLeft, preWidth, scrollDelta } = param;
+    const move = (param: { preLeft: number; preWidth: number; scrollDelta?: number; preTop?: number }) => {
+      const { preLeft, preWidth, scrollDelta, preTop } = param;
       const distance = isAdsorption.current ? adsorptionDistance : grid;
       if (Math.abs(deltaX.current) >= distance) {
         const count = parseInt(deltaX.current / distance + '');
@@ -134,48 +165,60 @@ export const RowDnd = React.forwardRef<RowRndApi, RowRndProps>(
               left: curLeft,
               lastWidth: preWidth,
               width: preWidth,
+              top: preTop,
             },
             scrollDelta,
           );
           if (ret === false) return;
         }
-
         handleUpdateLeft(curLeft, false);
       }
+
+      const currentY = preTop;
+      handleUpdateTop(currentY, false);
     };
 
     const handleMove = (e: DragEvent) => {
       const target = e.target;
-
       if (deltaScrollLeft && parentRef?.current) {
+        console.log('deltaScrollLeft logic');
         const result = dealDragAutoScroll(e, (delta) => {
           deltaScrollLeft(delta);
 
-          let { left, width } = target.dataset;
+          let { left, width, top } = target.dataset;
           const preLeft = parseFloat(left);
           const preWidth = parseFloat(width);
+          const preTop = parseFloat(top || '0');
           deltaX.current += delta;
-          move({ preLeft, preWidth, scrollDelta: delta });
+          deltaY.current += e.dy;
+          move({ preLeft, preWidth, scrollDelta: delta, preTop });
         });
         if (!result) return;
       }
 
-      let { left, width } = target.dataset;
+      let { left, width, top } = target.dataset;
       const preLeft = parseFloat(left);
       const preWidth = parseFloat(width);
+      let preTop = parseFloat(top || '16');
 
       deltaX.current += e.dx;
-      move({ preLeft, preWidth });
+      deltaY.current += e.dy;
+      if (Math.abs(deltaY.current) > 0) {
+        preTop = deltaY.current;
+      }
+      move({ preLeft, preWidth, preTop });
     };
 
     const handleMoveStop = (e: DragEvent) => {
       deltaX.current = 0;
+      deltaY.current = 0;
       isAdsorption.current = false;
       stopAutoScroll();
 
       const target = e.target;
-      let { left, width } = target.dataset;
-      onDragEnd && onDragEnd({ left: parseFloat(left), width: parseFloat(width) });
+      let { left, width, top } = target.dataset;
+      const preTop = parseFloat(top || '0');
+      onDragEnd && onDragEnd({ left: parseFloat(left), width: parseFloat(width), top: preTop });
     };
 
     const handleResizeStart = (e: ResizeEvent) => {
@@ -307,29 +350,56 @@ export const RowDnd = React.forwardRef<RowRndApi, RowRndProps>(
       deltaX.current += dir === 'left' ? e.deltaRect.left : e.deltaRect.right;
       resize({ preLeft, preWidth, dir });
     };
+
     const handleResizeStop = (e: ResizeEvent) => {
       deltaX.current = 0;
       isAdsorption.current = false;
       stopAutoScroll();
 
       const target = e.target;
-      let { left, width } = target.dataset;
+      let { left, width, top } = target.dataset;
       let dir: Direction = e.edges?.right ? 'right' : 'left';
       onResizeEnd &&
         onResizeEnd(dir, {
           left: parseFloat(left),
           width: parseFloat(width),
+          top: parseFloat(top),
         });
+    };
+
+    const handleDropDeactivate = (event: DropEvent) => {
+      const target = interactable.current.target as HTMLElement;
+      event.relatedTarget.style.removeProperty('top');
+      // target.style.top = `${top}px`;
+      // Object.assign(target.dataset, { top: '0' });
+      // target.style.removeProperty('top');
+      deltaY.current = 0;
+      Object.assign(target.dataset, { top: 0 });
+    };
+
+    const handleOnDrop = (event: DropEvent) => {
+      const target = interactable.current.target as HTMLElement;
+      event.relatedTarget.style.removeProperty('top');
+      const droppedRow = event.target.getAttribute('data-rowid');
+      const actionId = event.relatedTarget.getAttribute('data-actionid');
+      //       console.log('eventdrop', event);
+      deltaY.current = 0;
+      Object.assign(target.dataset, { top: 0 });
+      if (onDrop) {
+        onDrop(droppedRow, actionId);
+      }
     };
     //#endregion
 
     return (
       <InteractComp
+        data-testid="interactcomponent"
         interactRef={interactable}
         draggable={enableDragging}
         resizable={enableResizing}
         draggableOptions={{
-          lockAxis: 'x',
+          startAxis: 'xy',
+          lockAxis: 'start',
           onmove: handleMove,
           onstart: handleMoveStart,
           onend: handleMoveStop,
@@ -351,12 +421,18 @@ export const RowDnd = React.forwardRef<RowRndApi, RowRndProps>(
           onstart: handleResizeStart,
           onend: handleResizeStop,
         }}
+        dropzone
+        dropzoneOptions={{
+          // ondropdeactivate: handleDropDeactivate,
+          ondrop: handleOnDrop,
+        }}
       >
         {React.cloneElement(children as ReactElement, {
           style: {
             ...((children as ReactElement).props.style || {}),
             left,
             width,
+            zIndex: 10,
           },
         })}
       </InteractComp>

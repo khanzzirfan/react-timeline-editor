@@ -52,6 +52,7 @@ export const EditAction: FC<EditActionProps> = ({
   handleTime,
   areaRef,
   deltaScrollLeft,
+  onDrop,
 }) => {
   const rowRnd = useRef<RowRndApi>();
   const isDragWhenClick = useRef(false);
@@ -100,11 +101,13 @@ export const EditAction: FC<EditActionProps> = ({
 
   //#region [rgba(100,120,156,0.08)] 回调
   const handleDragStart: RndDragStartCallback = () => {
+    // console.log('editaction-> handleDragstart');
     onActionMoveStart && onActionMoveStart({ action, row });
   };
-  const handleDrag: RndDragCallback = ({ left, width }) => {
-    isDragWhenClick.current = true;
 
+  const handleDrag: RndDragCallback = ({ left, width, top }) => {
+    // console.log('editaction-> handleDrag move');
+    isDragWhenClick.current = true;
     if (onActionMoving) {
       const { start, end } = parserTransformToTime({ left, width }, { scaleWidth, scale, startLeft });
       const result = onActionMoving({ action, row, start, end });
@@ -115,16 +118,15 @@ export const EditAction: FC<EditActionProps> = ({
   };
 
   const handleDragEnd: RndDragEndCallback = ({ left, width }) => {
+    // console.log('editaction-> handleDragEnd');
     // 计算时间
     const { start, end } = parserTransformToTime({ left, width }, { scaleWidth, scale, startLeft });
-
     // 设置数据
     const rowItem = editorData.find((item) => item.id === row.id);
     const action = rowItem.actions.find((item) => item.id === id);
     action.start = start;
     action.end = end;
     setEditorData(editorData);
-
     // 执行回调
     if (onActionMoveEnd) onActionMoveEnd({ action, row, start, end });
   };
@@ -230,6 +232,8 @@ export const EditAction: FC<EditActionProps> = ({
         }}
         className={prefix((classNames || []).join(' '))}
         style={{ height: rowHeight }}
+        data-testid="context-menu"
+        data-actionid={action?.id || 'null'}
       >
         {getActionRender && getActionRender(nowAction, nowRow)}
         {flexible && <div className={prefix('action-left-stretch')} />}
