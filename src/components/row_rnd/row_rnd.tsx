@@ -199,7 +199,7 @@ export const RowDnd = React.forwardRef<RowRndApi, RowRndProps>(
       let { left, width, top } = target.dataset;
       const preLeft = parseFloat(left);
       const preWidth = parseFloat(width);
-      let preTop = parseFloat(top || '16');
+      let preTop = parseFloat(top || '0');
 
       deltaX.current += e.dx;
       deltaY.current += e.dy;
