@@ -78,6 +78,9 @@ export const Timeline = React.forwardRef<TimelineState, TimelineEditor>((props, 
         }
         const rowId = event.currentTarget.getAttribute('data-rowid');
         const actionId = event.relatedTarget.getAttribute('data-actionid');
+        const relatedRowId = event.relatedTarget.getAttribute('data-rowid');
+        console.log('related Row id', relatedRowId);
+        if (relatedRowId === rowId) return;
         let droppedRowData = null;
         let oldRowId = null;
         let actionData = null;

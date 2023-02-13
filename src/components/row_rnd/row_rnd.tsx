@@ -181,7 +181,6 @@ export const RowDnd = React.forwardRef<RowRndApi, RowRndProps>(
     const handleMove = (e: DragEvent) => {
       const target = e.target;
       if (deltaScrollLeft && parentRef?.current) {
-        console.log('deltaScrollLeft logic');
         const result = dealDragAutoScroll(e, (delta) => {
           deltaScrollLeft(delta);
 
@@ -382,7 +381,6 @@ export const RowDnd = React.forwardRef<RowRndApi, RowRndProps>(
       event.relatedTarget.style.removeProperty('top');
       const droppedRow = event.target.getAttribute('data-rowid');
       const actionId = event.relatedTarget.getAttribute('data-actionid');
-      //       console.log('eventdrop', event);
       deltaY.current = 0;
       Object.assign(target.dataset, { top: 0 });
       if (onDrop) {

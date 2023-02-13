@@ -101,12 +101,10 @@ export const EditAction: FC<EditActionProps> = ({
 
   //#region [rgba(100,120,156,0.08)] 回调
   const handleDragStart: RndDragStartCallback = () => {
-    // console.log('editaction-> handleDragstart');
     onActionMoveStart && onActionMoveStart({ action, row });
   };
 
   const handleDrag: RndDragCallback = ({ left, width, top }) => {
-    // console.log('editaction-> handleDrag move');
     isDragWhenClick.current = true;
     if (onActionMoving) {
       const { start, end } = parserTransformToTime({ left, width }, { scaleWidth, scale, startLeft });
@@ -118,7 +116,6 @@ export const EditAction: FC<EditActionProps> = ({
   };
 
   const handleDragEnd: RndDragEndCallback = ({ left, width }) => {
-    // console.log('editaction-> handleDragEnd');
     // 计算时间
     const { start, end } = parserTransformToTime({ left, width }, { scaleWidth, scale, startLeft });
     // 设置数据

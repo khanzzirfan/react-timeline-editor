@@ -54,8 +54,6 @@ export const InteractComp: FC<{
       //   accept: '.timeline-editor-action',
       //   overlap: 0.75,
       //   checker: (dragEvent, event, dropped, dropzone, dropElement, draggable, dragElement) => {
-      //     // console.log('draggelement', dragElement);
-      //     // console.log('draggables', draggable);
       //     return true;
       //   },
       //   ondropactivate: function (event) {
