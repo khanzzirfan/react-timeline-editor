@@ -1,7 +1,7 @@
 {
-  "name": "@xzdarcy/react-timeline-editor",
-  "version": "0.1.7",
-  "author": "xzdarcy",
+  "name": "@reacthub/react-timeline-editor",
+  "version": "0.2.0",
+  "author": "khanzzirfan",
   "license": "MIT",
   "keywords": [
     "timeline",
@@ -11,12 +11,12 @@
     "typescript"
   ],
   "bugs": {
-    "url": "https://github.com/xzdarcy/react-timeline-editor/issues"
+    "url": "https://github.com/khanzzirfan/react-timeline-editor/issues"
   },
-  "homepage": "https://github.com/xzdarcy/react-timeline-editor#readme",
+  "homepage": "https://github.com/khanzzirfan/react-timeline-editor#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xzdarcy/react-timeline-editor.git"
+    "url": "git+https://github.com/khanzzirfan/react-timeline-editor.git"
   },
   "scripts": {
     "start": "dumi dev",
@@ -24,7 +24,8 @@
     "docs:deploy": "",
     "build": "father-build",
     "deploy": "npm run docs:build && npm run docs:deploy",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "release": "standard-version --release-as minor"
   },
   "files": [
     "dist"
@@ -60,6 +61,7 @@
     "prettier": "^2.2.1",
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
+    "standard-version": "^9.5.0",
     "yorkie": "^2.0.0"
   }
 }
