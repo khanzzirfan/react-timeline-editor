@@ -116,9 +116,10 @@ export const RowDnd = React.forwardRef<RowRndApi, RowRndProps>(
 
     //#region [rgba(188,188,120,0.05)] 回调api
     const handleMoveStart = (e: DragEvent) => {
+      const isCursor = e.target.getAttribute('data-id') === 'cursor';
       deltaX.current = 0;
-      deltaY.current = 0;
-      originalY.current = e.dy;
+      if (!isCursor) deltaY.current = 0;
+      if (!isCursor) originalY.current = e.dy;
       isAdsorption.current = false;
       initAutoScroll();
       onDragStart && onDragStart();
@@ -174,12 +175,15 @@ export const RowDnd = React.forwardRef<RowRndApi, RowRndProps>(
         handleUpdateLeft(curLeft, false);
       }
 
-      const currentY = preTop;
-      handleUpdateTop(currentY, false);
+      if (preTop) {
+        const currentY = preTop;
+        handleUpdateTop(currentY, false);
+      }
     };
 
     const handleMove = (e: DragEvent) => {
       const target = e.target;
+      const isCursor = e.target.getAttribute('data-id') === 'cursor';
       if (deltaScrollLeft && parentRef?.current) {
         const result = dealDragAutoScroll(e, (delta) => {
           deltaScrollLeft(delta);
@@ -187,9 +191,9 @@ export const RowDnd = React.forwardRef<RowRndApi, RowRndProps>(
           let { left, width, top } = target.dataset;
           const preLeft = parseFloat(left);
           const preWidth = parseFloat(width);
-          const preTop = parseFloat(top || '0');
           deltaX.current += delta;
-          deltaY.current += e.dy;
+          const preTop = !isCursor ? parseFloat(top || '0') : undefined;
+          if (!isCursor) deltaY.current += e.dy;
           move({ preLeft, preWidth, scrollDelta: delta, preTop });
         });
         if (!result) return;
@@ -198,10 +202,10 @@ export const RowDnd = React.forwardRef<RowRndApi, RowRndProps>(
       let { left, width, top } = target.dataset;
       const preLeft = parseFloat(left);
       const preWidth = parseFloat(width);
-      let preTop = parseFloat(top || '0');
+      let preTop = !isCursor ? parseFloat(top || '0') : undefined;
 
       deltaX.current += e.dx;
-      deltaY.current += e.dy;
+      if (!isCursor) deltaY.current += e.dy;
       if (Math.abs(deltaY.current) > 0) {
         preTop = deltaY.current;
       }
@@ -209,14 +213,16 @@ export const RowDnd = React.forwardRef<RowRndApi, RowRndProps>(
     };
 
     const handleMoveStop = (e: DragEvent) => {
+      const isCursor = e.target.getAttribute('data-id') === 'cursor';
+
       deltaX.current = 0;
-      deltaY.current = 0;
+      if (!isCursor) deltaY.current = 0;
       isAdsorption.current = false;
       stopAutoScroll();
 
       const target = e.target;
       let { left, width, top } = target.dataset;
-      const preTop = parseFloat(top || '0');
+      const preTop = !isCursor ? parseFloat(top || '0') : undefined;
       onDragEnd && onDragEnd({ left: parseFloat(left), width: parseFloat(width), top: preTop });
     };
 
@@ -366,25 +372,29 @@ export const RowDnd = React.forwardRef<RowRndApi, RowRndProps>(
         });
     };
 
-    const handleDropDeactivate = (event: DropEvent) => {
-      const target = interactable.current.target as HTMLElement;
-      event.relatedTarget.style.removeProperty('top');
-      // target.style.top = `${top}px`;
-      // Object.assign(target.dataset, { top: '0' });
-      // target.style.removeProperty('top');
-      deltaY.current = 0;
-      Object.assign(target.dataset, { top: 0 });
-    };
+    // const handleDropDeactivate = (event: DropEvent) => {
+    //   const target = interactable.current.target as HTMLElement;
+    //   event.relatedTarget.style.removeProperty('top');
+    //   // target.style.top = `${top}px`;
+    //   // Object.assign(target.dataset, { top: '0' });
+    //   // target.style.removeProperty('top');
+    //   deltaY.current = 0;
+    //   Object.assign(target.dataset, { top: 0 });
+    // };
 
     const handleOnDrop = (event: DropEvent) => {
-      const target = interactable.current.target as HTMLElement;
-      event.relatedTarget.style.removeProperty('top');
-      const droppedRow = event.target.getAttribute('data-rowid');
-      const actionId = event.relatedTarget.getAttribute('data-actionid');
-      deltaY.current = 0;
-      Object.assign(target.dataset, { top: 0 });
-      if (onDrop) {
-        onDrop(droppedRow, actionId);
+      const isCursor = event.target.getAttribute('data-id') === 'cursor';
+      if (!isCursor) {
+        // not a cursor
+        const target = interactable.current.target as HTMLElement;
+        event.relatedTarget.style.removeProperty('top');
+        const droppedRow = event.target.getAttribute('data-rowid');
+        const actionId = event.relatedTarget.getAttribute('data-actionid');
+        deltaY.current = 0;
+        Object.assign(target.dataset, { top: 0 });
+        if (onDrop) {
+          onDrop(droppedRow, actionId);
+        }
       }
     };
     //#endregion
@@ -397,7 +407,7 @@ export const RowDnd = React.forwardRef<RowRndApi, RowRndProps>(
         resizable={enableResizing}
         draggableOptions={{
           startAxis: 'xy',
-          lockAxis: 'start',
+          // lockAxis: 'start',
           onmove: handleMove,
           onstart: handleMoveStart,
           onend: handleMoveStop,

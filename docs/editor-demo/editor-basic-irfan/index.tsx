@@ -9,6 +9,10 @@ const defaultEditorData = cloneDeep(mockData);
 const TimelineEditor = () => {
   const [data, setData] = useState(defaultEditorData);
 
+  React.useEffect(() => {
+    console.log('data updated', data);
+  }, [data]);
+
   return (
     <div className="timeline-editor-example0">
       <Timeline onChange={setData} editorData={data} effects={mockEffect} hideCursor={false} />
