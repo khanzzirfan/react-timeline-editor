@@ -112,7 +112,7 @@ export const Timeline = React.forwardRef<TimelineState, TimelineEditor>((props, 
           }
           return er;
         });
-        /// console.log('modifiedEditorData', modifiedEditorData, oldRowId, rowId);
+        console.log('modifiedEditorData', modifiedEditorData, oldRowId, rowId);
         setEditorData(modifiedEditorData);
         handleEditorDataChange(modifiedEditorData);
         if (onDrop) {
