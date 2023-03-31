@@ -91,24 +91,28 @@ export const Timeline = React.forwardRef<TimelineState, TimelineEditor>((props, 
           }
         });
         if (oldRowId === rowId) return;
+
+        if (!Array.isArray(editorData)) return null;
         const modifiedEditorData = editorData.map((er) => {
           if (er.id === rowId) {
             const currActions = er.actions || [];
             const updatedActions = currActions.concat(actionData);
-
+            const nonNullActions = updatedActions.filter((f) => !!f);
             return {
               ...er,
-              actions: updatedActions,
+              actions: nonNullActions,
             };
           } else if (er.id === oldRowId) {
             const updatedActions = er.actions.filter((f) => f.id !== actionData.id);
+            const nonNullActions = updatedActions.filter((f) => !!f);
             return {
               ...er,
-              actions: updatedActions,
+              actions: nonNullActions,
             };
           }
           return er;
         });
+        /// console.log('modifiedEditorData', modifiedEditorData, oldRowId, rowId);
         setEditorData(modifiedEditorData);
         handleEditorDataChange(modifiedEditorData);
         if (onDrop) {

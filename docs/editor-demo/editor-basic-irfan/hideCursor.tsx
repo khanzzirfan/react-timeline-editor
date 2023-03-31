@@ -1,4 +1,4 @@
-import { Timeline } from '@xzdarcy/react-timeline-editor';
+import { Timeline } from '../../../src/components/timeline';
 import { Switch } from 'antd';
 import { cloneDeep } from 'lodash';
 import React, { useState } from 'react';
@@ -13,19 +13,8 @@ const TimelineEditor = () => {
 
   return (
     <div className="timeline-editor-example0">
-      <Switch
-        checkedChildren="开启光标"
-        unCheckedChildren="隐藏光标"
-        checked={showCursor}
-        onChange={e => setShowCursor(e)}
-        style={{marginBottom: 20}}
-      />
-      <Timeline
-        onChange={setData}
-        editorData={data}
-        effects={mockEffect}
-        hideCursor={!showCursor}
-      />
+      <Switch checkedChildren="开启光标" unCheckedChildren="隐藏光标" checked={showCursor} onChange={(e) => setShowCursor(e)} style={{ marginBottom: 20 }} />
+      <Timeline onChange={setData} editorData={data} effects={mockEffect} hideCursor={!showCursor} />
     </div>
   );
 };

@@ -309,6 +309,7 @@ export class TimelineEngine extends Emitter<EventTypes> {
     data.map((row) => {
       actions.push(...row.actions);
     });
+    // console.log('timeline data', data);
     const sortActions = actions.sort((a, b) => a.start - b.start);
     const actionMap: Record<string, TimelineAction> = {};
     const actionSortIds: string[] = [];
