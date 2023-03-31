@@ -91,10 +91,8 @@ export const Timeline = React.forwardRef<TimelineState, TimelineEditor>((props, 
           }
         });
         console.log('editorData', editorData, oldRowId, rowId);
-
         if (oldRowId === rowId) return;
         if (!Array.isArray(editorData)) return null;
-        if (editorData.length < 1) return null;
         const modifiedEditorData = editorData.map((er) => {
           if (er.id === rowId) {
             const currActions = er.actions || [];
@@ -115,7 +113,6 @@ export const Timeline = React.forwardRef<TimelineState, TimelineEditor>((props, 
           return er;
         });
         console.log('modifiedEditorData', modifiedEditorData, oldRowId, rowId);
-        if (modifiedEditorData.length < 1) return null;
         // update actions
         setEditorData(modifiedEditorData);
         handleEditorDataChange(modifiedEditorData);

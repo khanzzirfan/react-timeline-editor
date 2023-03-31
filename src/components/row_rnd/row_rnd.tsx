@@ -1,11 +1,10 @@
 import { Interactable } from '@interactjs/core/Interactable';
-import { DragEvent, DropEvent, ResizeEvent } from '@interactjs/types/index';
+import { DragEvent, ResizeEvent } from '@interactjs/types/index';
 import React, { ReactElement, useEffect, useImperativeHandle, useRef } from 'react';
 import { DEFAULT_ADSORPTION_DISTANCE, DEFAULT_MOVE_GRID, DEFAULT_START_LEFT } from '../../interface/const';
 import { useAutoScroll } from './hooks/useAutoScroll';
 import { InteractComp } from './interactable';
 import { Direction, RowRndApi, RowRndProps } from './row_rnd_interface';
-import interact from 'interactjs';
 
 export const RowDnd = React.forwardRef<RowRndApi, RowRndProps>(
   (
@@ -382,21 +381,6 @@ export const RowDnd = React.forwardRef<RowRndApi, RowRndProps>(
     //   Object.assign(target.dataset, { top: 0 });
     // };
 
-    const handleOnDrop = (event: DropEvent) => {
-      const isCursor = event.target.getAttribute('data-id') === 'cursor';
-      if (!isCursor) {
-        // not a cursor
-        const target = interactable.current.target as HTMLElement;
-        event.relatedTarget.style.removeProperty('top');
-        const droppedRow = event.target.getAttribute('data-rowid');
-        const actionId = event.relatedTarget.getAttribute('data-actionid');
-        deltaY.current = 0;
-        Object.assign(target.dataset, { top: 0 });
-        if (onDrop) {
-          onDrop(droppedRow, actionId);
-        }
-      }
-    };
     //#endregion
 
     return (
@@ -428,11 +412,6 @@ export const RowDnd = React.forwardRef<RowRndApi, RowRndProps>(
           onmove: handleResize,
           onstart: handleResizeStart,
           onend: handleResizeStop,
-        }}
-        dropzone
-        dropzoneOptions={{
-          // ondropdeactivate: handleDropDeactivate,
-          ondrop: handleOnDrop,
         }}
       >
         {React.cloneElement(children as ReactElement, {
