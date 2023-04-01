@@ -34,6 +34,7 @@ export const Timeline = React.forwardRef<TimelineState, TimelineEditor>((props, 
   const domRef = useRef<HTMLDivElement>();
   const areaRef = useRef<HTMLDivElement>();
   const scrollSync = useRef<ScrollSync>();
+  const editorDataRef = useRef<TimelineRow[]>(data);
 
   // 编辑器数据
   const [editorData, setEditorData] = useState(data);
@@ -51,9 +52,13 @@ export const Timeline = React.forwardRef<TimelineState, TimelineEditor>((props, 
   }, [data, minScaleCount, scale]);
 
   useEffect(() => {
+    editorDataRef.current = data;
+  }, [data]);
+
+  useEffect(() => {
     interact('.timeline-editor-edit-row').dropzone({
       accept: '.timeline-editor-action',
-      overlap: 0.65,
+      overlap: 0.4,
       ondropactivate: function (event) {
         // add active dropzone feedback
         event.target.classList.add('drop-active');
@@ -81,7 +86,8 @@ export const Timeline = React.forwardRef<TimelineState, TimelineEditor>((props, 
         let droppedRowData = null;
         let oldRowId = null;
         let actionData = null;
-        editorData.forEach((f) => {
+
+        editorDataRef.current.forEach((f) => {
           const hasAction = f.actions.find((e) => e.id === actionId);
           if (hasAction) {
             oldRowId = f.id;
@@ -90,10 +96,11 @@ export const Timeline = React.forwardRef<TimelineState, TimelineEditor>((props, 
             droppedRowData = restProps;
           }
         });
-        console.log('editorData', editorData, oldRowId, rowId);
+        console.log('editorData', editorDataRef.current, oldRowId, rowId);
         if (oldRowId === rowId) return;
-        if (!Array.isArray(editorData)) return null;
-        const modifiedEditorData = editorData.map((er) => {
+        if (!Array.isArray(editorDataRef.current)) return null;
+
+        const modifiedEditorData = editorDataRef.current.map((er) => {
           if (er.id === rowId) {
             const currActions = er.actions || [];
             const updatedActions = currActions.concat(actionData);
