@@ -419,7 +419,7 @@ export const RowDnd = React.forwardRef<RowRndApi, RowRndProps>(
             ...((children as ReactElement).props.style || {}),
             left,
             width,
-            zIndex: 10,
+            // zIndex: 10,
           },
         })}
       </InteractComp>
