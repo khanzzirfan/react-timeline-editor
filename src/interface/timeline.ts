@@ -196,6 +196,19 @@ export interface EditData {
    * @returns
    */
   onDrop?: (rowId, actionId) => void;
+
+  /**
+   * action item for a current collision row id and action id
+   * @param rowId row id dropped to
+   * @param actionId action item id that got dropped to a rowid
+   * @returns
+   */
+  onCollisionActive?: (rowId: string, actionId: string, isCollisionActive: boolean) => void;
+  /**
+   *
+   * @returns when inactive collision triggered
+   */
+  onCollisionInActive?: () => void;
 }
 
 export interface TimelineState {

@@ -1,7 +1,7 @@
 {
   "name": "reacthub-timeline-editor",
   "testName": "@xzdarcy/react-timeline-editor",
-  "version": "0.19.0",
+  "version": "0.19.2",
   "author": "khanzzirfan",
   "license": "MIT",
   "keywords": [
@@ -43,6 +43,7 @@
     "@types/react-virtualized": "^9.21.14",
     "framework-utils": "^1.1.0",
     "interactjs": "^1.10.11",
+    "react-intersection-observer": "^9.4.3",
     "react-virtualized": "^9.22.3"
   },
   "devDependencies": {

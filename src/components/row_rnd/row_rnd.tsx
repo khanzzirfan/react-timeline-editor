@@ -87,6 +87,7 @@ export const RowDnd = React.forwardRef<RowRndApi, RowRndProps>(
       reset && (deltaY.current = 0);
       const target = interactable.current.target as HTMLElement;
       target.style.top = `${top}px`;
+      target.style.zIndex = `10`;
       Object.assign(target.dataset, { top });
     };
 

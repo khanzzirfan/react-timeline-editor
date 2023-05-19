@@ -55,6 +55,7 @@ export const EditAction: FC<EditActionProps> = ({
   onDrop,
 }) => {
   const rowRnd = useRef<RowRndApi>();
+
   const isDragWhenClick = useRef(false);
   const { id, maxEnd, minStart, end, start, selected, flexible = true, movable = true, effectId } = action;
 
@@ -157,6 +158,7 @@ export const EditAction: FC<EditActionProps> = ({
     // 触发回调
     if (onActionResizeEnd) onActionResizeEnd({ action, row, start, end, dir });
   };
+
   //#endregion
 
   const nowAction = {
@@ -230,6 +232,8 @@ export const EditAction: FC<EditActionProps> = ({
         className={prefix((classNames || []).join(' '))}
         style={{ height: rowHeight }}
         data-testid="context-menu"
+        data-id="actionitem"
+        data-rowid={row.id}
         data-actionid={action?.id || 'null'}
       >
         {getActionRender && getActionRender(nowAction, nowRow)}

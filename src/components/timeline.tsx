@@ -28,6 +28,8 @@ export const Timeline = React.forwardRef<TimelineState, TimelineEditor>((props, 
     onChange,
     autoReRender = true,
     onScroll: onScrollVertical,
+    onCollisionActive,
+    onCollisionInActive,
   } = checkedProps;
 
   const engineRef = useRef<TimelineEngine>(new TimelineEngine());
@@ -96,7 +98,6 @@ export const Timeline = React.forwardRef<TimelineState, TimelineEditor>((props, 
             droppedRowData = restProps;
           }
         });
-        console.log('editorData', editorDataRef.current, oldRowId, rowId);
         if (oldRowId === rowId) return;
         if (!Array.isArray(editorDataRef.current)) return null;
 
@@ -119,7 +120,6 @@ export const Timeline = React.forwardRef<TimelineState, TimelineEditor>((props, 
           }
           return er;
         });
-        console.log('modifiedEditorData', modifiedEditorData, oldRowId, rowId);
         // update actions
         setEditorData(modifiedEditorData);
         handleEditorDataChange(modifiedEditorData);
@@ -133,6 +133,53 @@ export const Timeline = React.forwardRef<TimelineState, TimelineEditor>((props, 
         event.target.classList.remove('drop-active');
         event.target.classList.remove('drop-target');
         event.relatedTarget.style.removeProperty('top');
+      },
+    });
+  }, []);
+
+  useEffect(() => {
+    interact('div[data-id="actionitem"]').dropzone({
+      accept: '.timeline-editor-action',
+      overlap: 0.2,
+      ondropactivate: function (event) {
+        // add active dropzone feedback
+        //console.log('running dropactivate collison');
+      },
+
+      ondragenter: function (event) {
+        // let draggableElement = event.relatedTarget;
+        // let dropzoneElement = event.target;
+        // // feedback the possibility of a drop
+        const targetRowId = event.currentTarget.getAttribute('data-rowid');
+        const targetActionId = event.currentTarget.getAttribute('data-actionid');
+
+        // const dragRowId = event.relatedTarget.getAttribute('data-rowid');
+        const dragActionId = event.relatedTarget.getAttribute('data-actionid');
+        if (dragActionId !== targetActionId) {
+          event.target.classList.add('collison-active');
+          if (onCollisionActive) {
+            onCollisionActive(targetRowId, targetActionId, true);
+          }
+        }
+        // dropzoneElement.classList.add('drop-target');
+        // draggableElement.classList.add('can-drop');
+        // draggableElement.textContent = 'Dragged in';
+      },
+      ondragleave: function (event) {
+        // remove the drop feedback style
+        event.target.classList.remove('collison-active');
+        if (onCollisionInActive) {
+          onCollisionInActive();
+        }
+        // event.target.classList.remove('drop-target');
+        // event.relatedTarget.classList.remove('can-drop');
+        // event.relatedTarget.textContent = 'Dragged out';
+      },
+
+      ondropdeactivate: function (event) {
+        event.stopPropagation();
+        // remove active dropzone feedback
+        event.target.classList.remove('collison-active');
       },
     });
   }, []);
