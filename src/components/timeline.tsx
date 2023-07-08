@@ -140,7 +140,7 @@ export const Timeline = React.forwardRef<TimelineState, TimelineEditor>((props, 
   useEffect(() => {
     interact('div[data-id="actionitem"]').dropzone({
       accept: '.timeline-editor-action',
-      overlap: 0.2,
+      overlap: 0.01,
       ondropactivate: function (event) {
         // add active dropzone feedback
         //console.log('running dropactivate collison');
