@@ -52,8 +52,10 @@ export const EditAction: FC<EditActionProps> = ({
   handleTime,
   areaRef,
   deltaScrollLeft,
+  onDrop,
 }) => {
   const rowRnd = useRef<RowRndApi>();
+
   const isDragWhenClick = useRef(false);
   const { id, maxEnd, minStart, end, start, selected, flexible = true, movable = true, effectId } = action;
 
@@ -102,9 +104,9 @@ export const EditAction: FC<EditActionProps> = ({
   const handleDragStart: RndDragStartCallback = () => {
     onActionMoveStart && onActionMoveStart({ action, row });
   };
-  const handleDrag: RndDragCallback = ({ left, width }) => {
-    isDragWhenClick.current = true;
 
+  const handleDrag: RndDragCallback = ({ left, width, top }) => {
+    isDragWhenClick.current = true;
     if (onActionMoving) {
       const { start, end } = parserTransformToTime({ left, width }, { scaleWidth, scale, startLeft });
       const result = onActionMoving({ action, row, start, end });
@@ -117,14 +119,12 @@ export const EditAction: FC<EditActionProps> = ({
   const handleDragEnd: RndDragEndCallback = ({ left, width }) => {
     // 计算时间
     const { start, end } = parserTransformToTime({ left, width }, { scaleWidth, scale, startLeft });
-
     // 设置数据
     const rowItem = editorData.find((item) => item.id === row.id);
     const action = rowItem.actions.find((item) => item.id === id);
     action.start = start;
     action.end = end;
     setEditorData(editorData);
-
     // 执行回调
     if (onActionMoveEnd) onActionMoveEnd({ action, row, start, end });
   };
@@ -158,6 +158,7 @@ export const EditAction: FC<EditActionProps> = ({
     // 触发回调
     if (onActionResizeEnd) onActionResizeEnd({ action, row, start, end, dir });
   };
+
   //#endregion
 
   const nowAction = {
@@ -230,6 +231,10 @@ export const EditAction: FC<EditActionProps> = ({
         }}
         className={prefix((classNames || []).join(' '))}
         style={{ height: rowHeight }}
+        data-testid="context-menu"
+        data-id="actionitem"
+        data-rowid={row.id}
+        data-actionid={action?.id || 'null'}
       >
         {getActionRender && getActionRender(nowAction, nowRow)}
         {flexible && <div className={prefix('action-left-stretch')} />}

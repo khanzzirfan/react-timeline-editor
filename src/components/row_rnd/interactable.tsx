@@ -1,8 +1,8 @@
-import { DraggableOptions } from "@interactjs/actions/drag/plugin";
-import { ResizableOptions } from "@interactjs/actions/resize/plugin";
-import { DragEvent, Interactable } from "@interactjs/types";
-import interact from "interactjs";
-import { cloneElement, FC, ReactElement, useEffect, useRef } from "react";
+import { DraggableOptions } from '@interactjs/actions/drag/plugin';
+import { ResizableOptions } from '@interactjs/actions/resize/plugin';
+import { DragEvent, Interactable } from '@interactjs/types';
+import interact from 'interactjs';
+import { cloneElement, FC, ReactElement, useEffect, useRef } from 'react';
 
 export const InteractComp: FC<{
   interactRef?: React.MutableRefObject<Interactable>;
@@ -36,12 +36,60 @@ export const InteractComp: FC<{
         onmove: (e) => draggableOptionsRef.current.onmove && (draggableOptionsRef.current.onmove as (e: DragEvent) => any)(e),
         onend: (e) => draggableOptionsRef.current.onend && (draggableOptionsRef.current.onend as (e: DragEvent) => any)(e),
       });
-    if (resizable) interactable.current.resizable({ 
-      ...resizableOptionsRef.current,
-      onstart: (e) => resizableOptionsRef.current.onstart && (resizableOptionsRef.current.onstart as (e: DragEvent) => any)(e),
-      onmove: (e) => resizableOptionsRef.current.onmove && (resizableOptionsRef.current.onmove as (e: DragEvent) => any)(e),
-      onend: (e) => resizableOptionsRef.current.onend && (resizableOptionsRef.current.onend as (e: DragEvent) => any)(e),
-    });
+    if (resizable)
+      interactable.current.resizable({
+        ...resizableOptionsRef.current,
+        onstart: (e) => resizableOptionsRef.current.onstart && (resizableOptionsRef.current.onstart as (e: DragEvent) => any)(e),
+        onmove: (e) => resizableOptionsRef.current.onmove && (resizableOptionsRef.current.onmove as (e: DragEvent) => any)(e),
+        onend: (e) => resizableOptionsRef.current.onend && (resizableOptionsRef.current.onend as (e: DragEvent) => any)(e),
+      });
+
+    // if (dropzone) {
+    // interactable.current.dropzone({
+    //   accept: '.timeline-editor-action',
+    //   overlap: 0.75,
+    //   checker: (dragEvent, event, dropped, dropzone, dropElement, draggable, dragElement) => {
+    //     return true;
+    //   },
+    //   ondropactivate: function (event) {
+    //     // add active dropzone feedback
+    //     console.log('dropactivate');
+    //     event.target.classList.add('drop-active');
+    //   },
+    //   ondragenter: function (event) {
+    //     console.log('ondragenter');
+    //     var draggableElement = event.relatedTarget;
+    //     var dropzoneElement = event.target;
+    //     // feedback the possibility of a drop
+    //     dropzoneElement.classList.add('drop-target');
+    //     draggableElement.classList.add('can-drop');
+    //     // draggableElement.textContent = 'Dragged in';
+    //   },
+    //   ondragleave: function (event) {
+    //     console.log('ondragleave');
+    //     // remove the drop feedback style
+    //     event.target.classList.remove('drop-target');
+    //     event.relatedTarget.classList.remove('can-drop');
+    //     // event.relatedTarget.textContent = 'Dragged out';
+    //   },
+    //   ondrop: function (event) {
+    //     console.log('onDropevent', event);
+    //     // event.relatedTarget.textContent = 'Dropped';
+    //     if (dropzoneOptionsRef.current.ondrop) {
+    //       (dropzoneOptionsRef.current.ondrop as (e: DropEvent) => any)(event);
+    //     }
+    //   },
+    //   ondropdeactivate: function (event) {
+    //     console.log('ondropdeactivate', event);
+    //     // remove active dropzone feedback
+    //     event.target.classList.remove('drop-active');
+    //     event.target.classList.remove('drop-target');
+    //     if (dropzoneOptionsRef.current.ondrop) {
+    //       (dropzoneOptionsRef.current.ondrop as (e: DropEvent) => any)(event);
+    //     }
+    //   },
+    // });
+    // }
   };
 
   return cloneElement(children as ReactElement, {

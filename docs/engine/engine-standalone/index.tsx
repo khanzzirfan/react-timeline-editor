@@ -22,11 +22,11 @@ const TimelineEditor = () => {
     timelineEngine.current.on('paused', () => setIsPlaying(false));
     timelineEngine.current.on('afterSetTime', ({ time }) => setTime(time));
     timelineEngine.current.on('setTimeByTick', ({ time }) => setTime(time));
-    
+
     let dur = 0;
-    mockData.forEach(row => {
-      row.actions.forEach(action => dur = Math.max(dur, action.end));
-    })
+    mockData.forEach((row) => {
+      row.actions.forEach((action) => (dur = Math.max(dur, action.end)));
+    });
     setDuration(dur);
 
     return () => {
@@ -50,7 +50,7 @@ const TimelineEditor = () => {
   const handleSetTime = (value: number) => {
     timelineEngine.current.setTime(Number(value));
     timelineEngine.current.reRender();
-  }
+  };
 
   // 时间展示
   const timeRender = (time: number) => {
@@ -69,7 +69,7 @@ const TimelineEditor = () => {
         </div>
         <div className="play-time">
           <div className="play-time-current">{timeRender(time)}</div>
-          <Slider onChange={handleSetTime} className="play-time-slider" step={0.01} min={0} max={duration} value={time} />
+          {/* <Slider onChange={handleSetTime} className="play-time-slider" step={0.01} min={0} max={duration} value={time} /> */}
           <div className="play-time-duration">{timeRender(duration)}</div>
         </div>
       </div>
