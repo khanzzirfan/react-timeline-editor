@@ -1,7 +1,8 @@
 {
-  "name": "reacthub-timeline-editor",
+  "name": "@xzdarcy/react-timeline-editor",
   "testName": "@xzdarcy/react-timeline-editor",
-  "version": "0.19.3",
+  "publishname": "reacthub-timeline-editor",
+  "version": "0.19.4",
   "author": "khanzzirfan",
   "license": "MIT",
   "keywords": [
