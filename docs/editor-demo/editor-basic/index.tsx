@@ -16,6 +16,7 @@ const TimelineEditor = () => {
         editorData={data}
         effects={mockEffect}
         hideCursor={false}
+        autoScroll={true}
       />
     </div>
   );
