@@ -1,4 +1,5 @@
-import React, { FC } from 'react';
+import React, { FC, useEffect, useRef } from 'react';
+import interact from 'interactjs';
 import { TimelineRow } from '../../interface/action';
 import { CommonProp } from '../../interface/common_prop';
 import { prefix } from '../../utils/deal_class_prefix';
@@ -17,10 +18,12 @@ export type EditRowProps = CommonProp & {
   scrollLeft: number;
   /** 设置scroll left */
   deltaScrollLeft: (scrollLeft: number) => void;
+  activeDropRowRef: React.MutableRefObject<string>;
 };
 
 export const EditRow: FC<EditRowProps> = (props) => {
-  const { rowData, style = {}, onClickRow, onDoubleClickRow, onContextMenuRow, areaRef, scrollLeft, startLeft, scale, scaleWidth } = props;
+  const { rowData, style = {}, onClickRow, onDoubleClickRow, onContextMenuRow, areaRef, scrollLeft, startLeft, scale, scaleWidth, activeDropRowRef } = props;
+  const nodeRef = useRef<HTMLDivElement>();
 
   const classNames = ['edit-row'];
   if (rowData?.selected) classNames.push('edit-row-selected');
@@ -34,8 +37,25 @@ export const EditRow: FC<EditRowProps> = (props) => {
     return time;
   };
 
+  useEffect(() => {
+    interact(nodeRef.current).dropzone({
+      accept: '.timeline-editor-action',
+      overlap: 0.4,
+      ondropactivate: function () {
+        activeDropRowRef.current = rowData?.id;
+      },
+      ondragenter: function () {
+        activeDropRowRef.current = rowData?.id;
+      },
+      ondrop: function () {
+        activeDropRowRef.current = rowData?.id;
+      },
+    });
+  }, []);
+
   return (
     <div
+      ref={nodeRef}
       className={`${prefix(...classNames)} ${(rowData?.classNames || []).join(' ')}`}
       data-testid="itemrow"
       data-rowid={rowData?.id}
@@ -60,7 +80,7 @@ export const EditRow: FC<EditRowProps> = (props) => {
       }}
     >
       {(rowData?.actions || []).map((action) => (
-        <EditAction key={action.id} {...props} handleTime={handleTime} row={rowData} action={action} />
+        <EditAction key={action.id} {...props} handleTime={handleTime} row={rowData} action={action} activeDropRowRef={activeDropRowRef} />
       ))}
     </div>
   );

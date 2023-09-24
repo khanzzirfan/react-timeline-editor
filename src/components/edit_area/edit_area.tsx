@@ -54,6 +54,7 @@ export const EditArea = React.forwardRef<EditAreaState, EditAreaProps>((props, r
   const editAreaRef = useRef<HTMLDivElement>();
   const gridRef = useRef<Grid>();
   const heightRef = useRef(-1);
+  const activeDropRowRef = useRef<string>();
 
   // ref 数据
   useImperativeHandle(ref, () => ({
@@ -111,6 +112,7 @@ export const EditArea = React.forwardRef<EditAreaState, EditAreaProps>((props, r
           backgroundSize: `${startLeft}px, ${scaleWidth}px`,
         }}
         areaRef={editAreaRef}
+        activeDropRowRef={activeDropRowRef}
         key={key}
         rowHeight={row?.rowHeight || rowHeight}
         rowData={row}
