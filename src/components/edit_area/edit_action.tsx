@@ -18,6 +18,7 @@ export type EditActionProps = CommonProp & {
   areaRef: React.MutableRefObject<HTMLDivElement>;
   /** 设置scroll left */
   deltaScrollLeft?: (delta: number) => void;
+  activeDropRowRef: React.MutableRefObject<string>;
 };
 
 export const EditAction: FC<EditActionProps> = ({
@@ -34,6 +35,7 @@ export const EditAction: FC<EditActionProps> = ({
   disableDrag,
 
   scaleCount,
+  maxScaleCount,
   setScaleCount,
   onActionMoveStart,
   onActionMoving,
@@ -52,7 +54,7 @@ export const EditAction: FC<EditActionProps> = ({
   handleTime,
   areaRef,
   deltaScrollLeft,
-  onDrop,
+  activeDropRowRef,
 }) => {
   const rowRnd = useRef<RowRndApi>();
 
@@ -65,11 +67,14 @@ export const EditAction: FC<EditActionProps> = ({
     scale,
     scaleWidth,
   });
-  const rightLimit = parserTimeToPixel(maxEnd || Number.MAX_VALUE, {
-    startLeft,
-    scale,
-    scaleWidth,
-  });
+  const rightLimit = Math.min(
+    maxScaleCount * scaleWidth + startLeft, // 根据maxScaleCount限制移动范围
+    parserTimeToPixel(maxEnd || Number.MAX_VALUE, {
+      startLeft,
+      scale,
+      scaleWidth,
+    }),
+  );
 
   // 初始化动作坐标数据
   const [transform, setTransform] = useState(() => {
@@ -109,7 +114,7 @@ export const EditAction: FC<EditActionProps> = ({
     isDragWhenClick.current = true;
     if (onActionMoving) {
       const { start, end } = parserTransformToTime({ left, width }, { scaleWidth, scale, startLeft });
-      const result = onActionMoving({ action, row, start, end });
+      const result = onActionMoving({ action, row, start, end, dropRowId: Number(activeDropRowRef.current) });
       if (result === false) return false;
     }
     setTransform({ left, width });
@@ -126,7 +131,7 @@ export const EditAction: FC<EditActionProps> = ({
     action.end = end;
     setEditorData(editorData);
     // 执行回调
-    if (onActionMoveEnd) onActionMoveEnd({ action, row, start, end });
+    if (onActionMoveEnd) onActionMoveEnd({ action, row, start, end, dropRowId: Number(activeDropRowRef.current) });
   };
 
   const handleResizeStart: RndResizeStartCallback = (dir) => {

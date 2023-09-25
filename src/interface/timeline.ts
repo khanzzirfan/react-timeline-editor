@@ -1,5 +1,6 @@
 import React, { ReactNode } from 'react';
 import { OnScrollParams } from 'react-virtualized';
+import { ITimelineEngine } from '..';
 import { Emitter } from '../engine/emitter';
 import { EventTypes } from '../engine/events';
 import { TimelineAction, TimelineRow } from './action';
@@ -26,6 +27,11 @@ export interface EditData {
    * @default 20
    */
   minScaleCount?: number;
+  /**
+   * @description 最大刻度个数（>=minScaleCount）
+   * @default Infinity
+   */
+  maxScaleCount?: number;
   /**
    * @description 单个刻度细分单元数（>0整数）
    * @default 10
@@ -67,6 +73,10 @@ export interface EditData {
    */
   disableDrag?: boolean;
   /**
+   * @description timeline运行器，不传则使用内置运行器
+   */
+  engine?: ITimelineEngine;
+  /**
    * @description 自定义action区域渲染
    */
   getActionRender?: (action: TimelineAction, row: TimelineRow) => ReactNode;
@@ -81,11 +91,11 @@ export interface EditData {
   /**
    * @description 移动回调（return false可阻止移动）
    */
-  onActionMoving?: (params: { action: TimelineAction; row: TimelineRow; start: number; end: number }) => void | boolean;
+  onActionMoving?: (params: { action: TimelineAction; row: TimelineRow; start: number; end: number; dropRowId?: number }) => void | boolean;
   /**
    * @description 移动结束回调（return false可阻止onChange触发）
    */
-  onActionMoveEnd?: (params: { action: TimelineAction; row: TimelineRow; start: number; end: number }) => void;
+  onActionMoveEnd?: (params: { action: TimelineAction; row: TimelineRow; start: number; end: number; dropRowId?: number }) => void;
   /**
    * @description 开始改变大小回调
    */
@@ -209,6 +219,10 @@ export interface EditData {
    * @returns when inactive collision triggered
    */
   onCollisionInActive?: () => void;
+  /**
+   * @description 点击时间区域事件, 返回false时阻止设置时间
+   */
+  onClickTimeArea?: (time: number, e: React.MouseEvent<HTMLDivElement, MouseEvent>) => boolean | undefined;
 }
 
 export interface TimelineState {
