@@ -37,9 +37,20 @@ export const Cursor: FC<CursorProps> = ({
   onCursorDragStart,
   onCursorDrag,
   onCursorDragEnd,
+  editorData = [],
 }) => {
   const rowRnd = useRef<RowRndApi>();
   const draggingLeft = useRef<undefined | number>();
+
+  const maxTime = React.useMemo(() => {
+    const time = editorData.reduce((prev, cur) => {
+      const curMax = cur.actions.reduce((prev, cur) => {
+        return Math.max(prev, cur.end);
+      }, 0);
+      return Math.max(prev, curMax);
+    }, 0);
+    return time;
+  }, [editorData]);
 
   useEffect(() => {
     if (typeof draggingLeft.current === 'undefined') {
@@ -75,13 +86,29 @@ export const Cursor: FC<CursorProps> = ({
         const scrollLeft = scrollSync.current.state.scrollLeft;
 
         if (!scroll || scrollLeft === 0) {
+          // Calculate the maximum left position based on a 10-second limit
+          const maxLeft = parserTimeToPixel(maxTime, { startLeft, scaleWidth, scale }) - scrollLeft;
+
           // 拖拽时，如果当前left < left min，将数值设置为 left min
+          // "When dragging, if the current 'left' value is less than the minimum 'left' value, set the value to the minimum 'left' value."
           if (left < startLeft - scrollLeft) draggingLeft.current = startLeft - scrollLeft;
-          else draggingLeft.current = left;
+          else if (left > maxLeft) {
+            draggingLeft.current = maxLeft;
+          } else {
+            draggingLeft.current = left;
+          }
         } else {
+          // restrict the dragging to the scroll area to maxLeft
+          const maxLeft = parserTimeToPixel(maxTime, { startLeft, scaleWidth, scale }) - scrollLeft;
           // 自动滚动时，如果当前left < left min，将数值设置为 left min
+          // "When auto-scrolling, if the current 'left' value is less than the minimum 'left' value, set the value to the minimum 'left' value."
           if (draggingLeft.current < startLeft - scrollLeft - scroll) {
             draggingLeft.current = startLeft - scrollLeft - scroll;
+          }
+          /// restrict the dragging to the scroll area to maxLeft
+          // 限制拖拽到scroll区域到maxLeft
+          if (draggingLeft.current > maxLeft) {
+            draggingLeft.current = maxLeft;
           }
         }
         rowRnd.current.updateLeft(draggingLeft.current);

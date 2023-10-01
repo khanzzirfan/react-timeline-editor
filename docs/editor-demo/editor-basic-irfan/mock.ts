@@ -29,7 +29,7 @@ export const mockData: TimelineRow[] = [
       {
         id: 'action10',
         start: 1.5,
-        end: 5,
+        end: 3,
         effectId: 'effect1',
       },
     ],

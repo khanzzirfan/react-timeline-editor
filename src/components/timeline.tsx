@@ -38,6 +38,7 @@ export const Timeline = React.forwardRef<TimelineState, TimelineEditor>((props, 
   const domRef = useRef<HTMLDivElement>();
   const areaRef = useRef<HTMLDivElement>();
   const scrollSync = useRef<ScrollSync>();
+  const editorDataRef = useRef<TimelineRow[]>(data);
 
   // 编辑器数据
   const [editorData, setEditorData] = useState(data);
@@ -55,6 +56,90 @@ export const Timeline = React.forwardRef<TimelineState, TimelineEditor>((props, 
     handleSetScaleCount(getScaleCountByRows(data, { scale }));
     setEditorData(data);
   }, [data, minScaleCount, maxScaleCount, scale]);
+
+  useEffect(() => {
+    editorDataRef.current = data;
+  }, [data]);
+
+  useEffect(() => {
+    interact('.timeline-editor-edit-row').dropzone({
+      accept: '.timeline-editor-action',
+      overlap: 0.4,
+      ondropactivate: function (event) {
+        // add active dropzone feedback
+        event.target.classList.add('drop-active');
+      },
+      ondragenter: function (event) {
+        let draggableElement = event.relatedTarget;
+        let dropzoneElement = event.target;
+        // feedback the possibility of a drop
+        dropzoneElement.classList.add('drop-target');
+        draggableElement.classList.add('can-drop');
+        // draggableElement.textContent = 'Dragged in';
+      },
+      ondragleave: function (event) {
+        // remove the drop feedback style
+        event.target.classList.remove('drop-target');
+        event.relatedTarget.classList.remove('can-drop');
+        // event.relatedTarget.textContent = 'Dragged out';
+      },
+      ondrop: function (event) {
+        if (event) {
+          event.stopPropagation();
+        }
+        const rowId = event.currentTarget.getAttribute('data-rowid');
+        const actionId = event.relatedTarget.getAttribute('data-actionid');
+        let droppedRowData = null;
+        let oldRowId = null;
+        let actionData = null;
+
+        editorDataRef.current.forEach((f) => {
+          const hasAction = f.actions.find((e) => e.id === actionId);
+          if (hasAction) {
+            oldRowId = f.id;
+            actionData = hasAction;
+            const { actions, ...restProps } = f;
+            droppedRowData = restProps;
+          }
+        });
+        if (oldRowId === rowId) return;
+        if (!Array.isArray(editorDataRef.current)) return null;
+
+        const modifiedEditorData = editorDataRef.current.map((er) => {
+          if (er.id === rowId) {
+            const currActions = er.actions || [];
+            const updatedActions = currActions.concat(actionData);
+            const nonNullActions = updatedActions.filter((f) => !!f);
+            return {
+              ...er,
+              actions: nonNullActions,
+            };
+          } else if (er.id === oldRowId) {
+            const updatedActions = er.actions.filter((f) => f.id !== actionData.id);
+            const nonNullActions = updatedActions.filter((f) => !!f);
+            return {
+              ...er,
+              actions: nonNullActions,
+            };
+          }
+          return er;
+        });
+        // update actions
+        setEditorData(modifiedEditorData);
+        handleEditorDataChange(modifiedEditorData);
+        if (onDrop) {
+          onDrop(rowId, actionId);
+        }
+      },
+      ondropdeactivate: function (event) {
+        event.stopPropagation();
+        // remove active dropzone feedback
+        event.target.classList.remove('drop-active');
+        event.target.classList.remove('drop-target');
+        event.relatedTarget.style.removeProperty('top');
+      },
+    });
+  }, []);
 
   useEffect(() => {
     interact('div[data-id="actionitem"]').dropzone({
