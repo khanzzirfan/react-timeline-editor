@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.19.7-alpha.1](https://github.com/khanzzirfan/react-timeline-editor/compare/v0.19.7-alpha.0...v0.19.7-alpha.1) (2023-10-01)
+
+
+### Bug Fixes
+
+* updated end of the timeline to restrict the dragging ([519f4db](https://github.com/khanzzirfan/react-timeline-editor/commit/519f4dbfa2ff8ed1009b544f8fbbb639564c8cf0))
+
 ### [0.19.7-alpha.0](https://github.com/khanzzirfan/react-timeline-editor/compare/v0.19.6...v0.19.7-alpha.0) (2023-09-25)
 
 ### 0.19.6 (2023-09-24)
