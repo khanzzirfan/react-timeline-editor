@@ -2,7 +2,7 @@
   "name": "reacthub-timeline-editor",
   "testName": "@xzdarcy/react-timeline-editor",
   "publishname": "reacthub-timeline-editor",
-  "version": "0.19.7-alpha.1",
+  "version": "0.19.7-alpha.2",
   "author": "khanzzirfan",
   "license": "MIT",
   "keywords": [
@@ -28,7 +28,7 @@
     "deploy": "npm run docs:build && npm run docs:deploy",
     "prepublishOnly": "npm run build",
     "release": "standard-version --release-as patch &&npm publish",
-    "release:alpha": "standard-version --prerelease alpha &&npm publish --tag alpha"
+    "release:alpha": "standard-version --prerelease alpha &&npm publish --tag latest"
   },
   "files": [
     "dist"
